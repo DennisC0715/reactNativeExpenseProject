@@ -47,6 +47,7 @@ const expenseSlice = createSlice({
       const id = `e${state.expenses.length + 1}`;
       console.log(id);
       state.expenses = [...state.expenses, { ...action.payload, id: id }];
+      console.log(state.expenses);
     },
     deleteExpense: (state, action) => {
       state.expenses = state.expenses.filter(
@@ -54,7 +55,7 @@ const expenseSlice = createSlice({
       );
     },
     updateExpense: (state, action) => {
-      console.log(state.expenses.length);
+      const editedItem = state.action.payload;
     },
   },
 });

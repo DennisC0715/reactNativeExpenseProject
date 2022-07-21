@@ -1,15 +1,19 @@
 import React, { useLayoutEffect } from "react";
 import { View, StyleSheet } from "react-native";
-import Button from "../components/Button";
 import ReusableButton from "../components/ReusableButton";
 import { GlobalStyles } from "../constants/styles";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addExpense, deleteExpense, updateExpense } from "../Redux/reducers";
+import ExpenseForm from "../components/ManageInput/ExpenseForm";
 
 const EditExpenses = ({ route, navigation }) => {
+  const expenseData = useSelector((state) => state.expense.expenses);
   const dispatch = useDispatch();
   const expenseId = route.params?.expenseId;
   const isEditing = !!expenseId; //convert Value to boolean
+  const specificEditingItem = expenseData.find(
+    (expense) => expense.id === expenseId
+  );
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -25,34 +29,27 @@ const EditExpenses = ({ route, navigation }) => {
   const cancelHandler = () => {
     navigation.goBack();
   };
-  const addItem = () => {
-    dispatch(
-      addExpense({
-        amount: 80.99,
-        descriptions: "a bike",
-        date: new Date("2022-07-19"),
-      })
-    );
-    navigation.goBack();
-  };
 
-  const updateItem = () => {
-    dispatch(updateExpense());
+  const confirmForm = (expenseData) => {
+    if (isEditing) {
+      dispatch(updateExpense({ id: expenseId, data: expenseData }));
+
+      navigation.goBack();
+    } else {
+      dispatch(addExpense(expenseData));
+      navigation.goBack();
+    }
   };
 
   return (
     <View style={css.container}>
-      <View style={css.buttonContainer}>
-        <Button mode="flat" onPress={cancelHandler} style={{ width: "45%" }}>
-          Cancel
-        </Button>
-        <Button
-          onPress={isEditing ? updateItem : addItem}
-          style={{ width: "45%" }}
-        >
-          {isEditing ? "Update" : "Add"}
-        </Button>
-      </View>
+      <ExpenseForm
+        onCancel={cancelHandler}
+        onSubmit={confirmForm}
+        isEditing={isEditing}
+        editItem={specificEditingItem}
+      />
+
       {isEditing && (
         <View style={css.delete}>
           <ReusableButton
@@ -81,9 +78,5 @@ const css = StyleSheet.create({
     borderTopWidth: 2,
     borderTopColor: GlobalStyles.colors.primary200,
     alignItems: "center",
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
   },
 });
